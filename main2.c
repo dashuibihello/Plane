@@ -44,6 +44,8 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Unable to create shared memory segment\n");
 		return 0;
 	}
+	
+	//在命令行将命令行参数值赋予shared data。 
 	shared_memory->sequence_size = seq_size;
 
 	//创建子进程
