@@ -20,31 +20,29 @@ int main(int argc, char **argv)
 {
 	int i = 0, seq_size, segment_id;
 	pid_t pid;
-	shared_data* shared_memory;
 	if (argc != 2) {
 		fprintf(stderr, "Usage: ./shm-fib <sequence size>\n");
-		return -1;
+		exit(1);
 	}
 	seq_size = atoi(argv[1]);
 	if (seq_size > MAX_SEQUENCE) {
 		fprintf(stderr, "sequence size must be < %d\n", MAX_SEQUENCE);
-		return -1;
+		exit(1);
 	}
+	shared_data* shared_memory;
 	if ((segment_id = shmget(IPC_PRIVATE, sizeof(shared_data), PERM)) == -1) {
 		fprintf(stderr, "Unable to create shared memory segment\n");
-		return 1;
+		exit(1);
 	}
-	printf("Created shared memory segment %d\n", segment_id);
 	if ((shared_memory = (shared_data *)shmat(segment_id, 0, 0)) == (shared_data *) - 1){
 		fprintf(stderr, "Unable to create shared memory segment\n");
 		return 0;
 	}
 	shared_memory->sequence_size = seq_size;
 	if ((pid = fork()) == (pid_t)-1) {
-		return 1;
+		exit(1);
 	}
 	if (pid == 0) {
-		printf("CHILD: shared memory attached at address %p\n", shared_memory);
 		shared_memory->fib_sequence[0] = 0;
 		shared_memory->fib_sequence[1] = 1;
 		for (i = 2; i < shared_memory->sequence_size; i++) {
