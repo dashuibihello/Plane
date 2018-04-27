@@ -18,9 +18,8 @@ typedef struct {
 
 int main(int argc, char **argv)
 {
-	int i, seq_size;
+	int i = 0, seq_size, segment_id;
 	pid_t pid;
-	int segment_id;
 	shared_data* shared_memory;
 	if (argc != 2) {
 		fprintf(stderr, "Usage: ./shm-fib <sequence size>\n");
@@ -31,14 +30,14 @@ int main(int argc, char **argv)
 		fprintf(stderr, "sequence size must be < %d\n", MAX_SEQUENCE);
 		return -1;
 	}
-	if ((segment_id = shmget(IPC_PRIVATE, sizeof(shared_data), PERM)) == -1) { //(见注1)
+	if ((segment_id = shmget(IPC_PRIVATE, sizeof(shared_data), PERM)) == -1) {
 		fprintf(stderr, "Unable to create shared memory segment\n");
 		return 1;
 	}
 	printf("Created shared memory segment %d\n", segment_id);
-	if ((shared_memory = (shared_data *)shamt(segment_id, 0, 0)) == (shared_data *) - 1){
+	if ((shared_memory = (shared_data *)shmat(segment_id, 0, 0)) == (shared_data *) - 1){
 		fprintf(stderr, "Unable to create shared memory segment\n");
-		return 1;
+		return 0;
 	}
 	shared_memory->sequence_size = seq_size;
 	if ((pid = fork()) == (pid_t)-1) {
@@ -48,16 +47,16 @@ int main(int argc, char **argv)
 		printf("CHILD: shared memory attached at address %p\n", shared_memory);
 		shared_memory->fib_sequence[0] = 0;
 		shared_memory->fib_sequence[1] = 1;
-		for (int i = 2; i < shared_memory->sequence_size; i++) {
+		for (i = 2; i < shared_memory->sequence_size; i++) {
 			shared_memory->fib_sequence[i] = shared_memory->fib_sequence[i - 2] + 
 				shared_memory->fib_sequence[i - 1];
-			shmdt((void *)shared_memory);
 		}
+		shmdt((void *)shared_memory);
 	}
 	else {
 		wait(NULL);
 		for (i = 0; i < shared_memory->sequence_size; i++) {
-			printf("PARENT:  %d:%ld", i, shared_memory->fib_sequence[i]);
+			printf("Parent: %d->%ld\n", i, shared_memory->fib_sequence[i]);
 		}
 		shmctl(segment_id, IPC_RMID, NULL);
 	}
