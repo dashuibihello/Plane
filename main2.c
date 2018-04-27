@@ -46,10 +46,9 @@ int main(int argc, char **argv)
 	}
 	shared_memory->sequence_size = seq_size;
 
-	//创建子进程，调用系统调用waitO等待子进程结束
-	if ((pid = fork()) == (pid_t)-1) {
-		exit(1);
-	}
+	//创建子进程
+	pid = fork();
+
 	if (pid == 0) {
 		shared_memory->fib_sequence[0] = 0;
 		shared_memory->fib_sequence[1] = 1;
@@ -61,7 +60,7 @@ int main(int argc, char **argv)
 	}
 
 	else {
-		//调用系统调用waitO等待子进程结束
+		//调用系统调用wait等待子进程结束
 		wait(NULL);
 
 		//输出共享内存段中Fibonacci序列的值
