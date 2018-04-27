@@ -19,6 +19,8 @@ typedef struct {
 int main(int argc, char **argv)
 {
 	int i = 0, seq_size, segment_id;
+
+	//接受命令行上传递的参数，执行错误检查以保证参数不大于MAX_SEQUENCE
 	pid_t pid;
 	if (argc != 2) {
 		fprintf(stderr, "Usage: ./shm-fib <sequence size>\n");
@@ -29,16 +31,22 @@ int main(int argc, char **argv)
 		fprintf(stderr, "sequence size must be < %d\n", MAX_SEQUENCE);
 		exit(1);
 	}
+
+	//创建一个大小为shared data 的共享内存段
 	shared_data* shared_memory;
+	
+	// 将共享内存段附加到地址空间
 	if ((segment_id = shmget(IPC_PRIVATE, sizeof(shared_data), PERM)) == -1) {
 		fprintf(stderr, "Unable to create shared memory segment\n");
 		exit(1);
 	}
-	if ((shared_memory = (shared_data *)shmat(segment_id, 0, 0)) == (shared_data *) - 1){
+	if ((shared_memory = (shared_data *)shmat(segment_id, 0, 0)) == (shared_data *)-1) {
 		fprintf(stderr, "Unable to create shared memory segment\n");
 		return 0;
 	}
 	shared_memory->sequence_size = seq_size;
+
+	//创建子进程，调用系统调用waitO等待子进程结束
 	if ((pid = fork()) == (pid_t)-1) {
 		exit(1);
 	}
@@ -46,16 +54,22 @@ int main(int argc, char **argv)
 		shared_memory->fib_sequence[0] = 0;
 		shared_memory->fib_sequence[1] = 1;
 		for (i = 2; i < shared_memory->sequence_size; i++) {
-			shared_memory->fib_sequence[i] = shared_memory->fib_sequence[i - 2] + 
+			shared_memory->fib_sequence[i] = shared_memory->fib_sequence[i - 2] +
 				shared_memory->fib_sequence[i - 1];
 		}
 		shmdt((void *)shared_memory);
 	}
+
 	else {
+		//调用系统调用waitO等待子进程结束
 		wait(NULL);
+
+		//输出共享内存段中Fibonacci序列的值
 		for (i = 0; i < shared_memory->sequence_size; i++) {
 			printf("Parent: %d->%ld\n", i, shared_memory->fib_sequence[i]);
 		}
+
+		//释放并删除共享内存段
 		shmctl(segment_id, IPC_RMID, NULL);
 	}
 	return 0;
