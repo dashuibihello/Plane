@@ -1,7 +1,18 @@
 #include<stdio.h>
 #include<unistd.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<string.h>
 
 #define MAX_LINE 80
+#define BUFFER_SIZE 50
+char buffer[BUFFER_SIZE];
+
+
+void handle_SIGINT() {
+	write(STDOUT_FILENO, buffer, strlen(buffer));
+	exit(0);
+}
 
 void setup(char inputBuffer[], char *args[], int *background)
 {
@@ -52,27 +63,38 @@ void setup(char inputBuffer[], char *args[], int *background)
 			}
 		}
 	}
+	for(i = 0; i < ct; i++) {
+		cout << args[i] << endl;
+	}
 	args[ct] = NULL; /* 命令字符数 > 80 */
 }
 
 int main(void)
 {
+	struct sigaction handler;
+	handler.sa_handler = handle_SIGINT;
+	sigaction(SIGINT, &handler, NULL);
+
+	strcpy(buffer,"Caught Control C\n");
+
 	char inputBuffer[MAX_LINE]; /* 这个缓存用来存放输入的命令*/
 	int background;             /* ==1时，表示在后台运行命令，即在命令后加上'&' */
 	char *args[MAX_LINE / 2 + 1];/* 命令最多40个参数 */
 
-
 	while (1) {            /* 程序在setup中正常结束*/
 		background = 0;
 		printf("COMMAND->"); //输出提示符，没有换行，仅将字符串送入输出缓存
-							  //若要输出输出缓存内容用fflush(stdout);头文件stdio.h
+		fflush(stdout);		 //若要输出输出缓存内容用fflush(stdout);头文件stdio.h
 		setup(inputBuffer, args, &background);       /* 获取下一个输入的命令 */
-
-													 /* 这一步要做:
-													 (1) 用fork()产生一个子进程
-													 (2) 子进程将调用execvp()执行命令,即 execvp(args[0],args);
-													 (3) 如果 background == 0, 父进程将等待子进程结束, 即if(background==0) wait(0);
-													 否则，将回到函数setup()中等待新命令输入.
-													 */
+		pid_t pid;
+		pid = fork();
+		if(pid == 0) {
+			execvp(args[0], args);
+		}
+		else{
+			if(background == 0) {
+				wait(0);
+			}
+		}
 	}
 }
