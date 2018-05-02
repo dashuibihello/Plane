@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < atoi(argv[1]); i++) {
         printf("Fiboncci(%d): %d\n", i, Fibo_arr[i]);
     }
+    return 0;
 }
 
 void* Fibo_fun(void *param) {
