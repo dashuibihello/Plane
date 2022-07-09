@@ -267,31 +267,31 @@ void wg_show_db_memsegment_header(void* db) {
 
   printf("\ndatarec_area\n");
   printf("-------------\n");
-  memset(dbh->datarec_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->datarec_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets) - 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->datarec_area_header));
   printf("\nlongstr_area\n");
   printf("-------------\n");
-  memset(dbh->longstr_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->longstr_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets) - 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->longstr_area_header));
   printf("\nlistcell_area\n");
   printf("-------------\n");
-  memset(dbh->listcell_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->listcell_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets)- 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->listcell_area_header));
   printf("\nshortstr_area\n");
   printf("-------------\n");
-  memset(dbh->shortstr_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->shortstr_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets)- 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->shortstr_area_header));
   printf("\nword_area\n");
   printf("-------------\n");
-  memset(dbh->word_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->word_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets)- 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->word_area_header));
   printf("\ndoubleword_area\n");
   printf("-------------\n");
-  memset(dbh->doubleword_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->doubleword_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets)- 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->doubleword_area_header));
   printf("\ntnode_area\n");
   printf("-------------\n");
-  memset(dbh->tnode_area_header.freebuckets, 0, EXACTBUCKETS_NR+VARBUCKETS_NR+CACHEBUCKETS_NR);
+  memset(dbh->tnode_area_header.freebuckets, 0, sizeof(dbh->datarec_area_header.freebuckets)- 2 * sizeof(gint));
   wg_show_db_area_header(db,&(dbh->tnode_area_header));
 }
 
